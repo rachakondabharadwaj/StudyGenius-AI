@@ -147,3 +147,57 @@ It also provides a **real exam environment** with restricted navigation, auto-su
 ---
 
 ## 🏗️ System Architecture
+User Uploads Files
+↓
+Text Extraction
+↓
+AI Processing (Google AI Studio)
+↓
+Topic Detection + Quiz Logic
+↓
+MCQ / Summary Generation
+↓
+Firebase Storage
+↓
+Frontend Display (React UI)
+
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+- React.js  
+- Tailwind CSS  
+
+### Backend / AI
+- Google AI Studio (LLM)  
+
+### Database & Auth
+- Firebase (Auth + Firestore)  
+
+### Deployment
+- Firebase Hosting / Netlify  
+
+---
+
+## ⚙️ How It Works
+
+1. Upload documents  
+2. Extract text from files  
+3. Detect topics using AI  
+4. Select quiz configuration  
+5. Generate MCQs  
+6. Attempt quiz  
+7. View score & explanations  
+8. Save results to history  
+
+---
+
+## 📦 Installation
+
+```bash
+git clone https://github.com/your-username/project-name.git
+cd project-name
+npm install
+npm run dev
