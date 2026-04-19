@@ -1,12 +1,9 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
 
 # Run and deploy your AI Studio app
 
 This contains everything you need to run your app locally.
 
-View your app in AI Studio: https://ai.studio/apps/ae4e6638-397c-46e1-a004-a37f53748020
+View app here:[ https://69e243fe4f7d832529dfb208--vermillion-lokum-69010c.netlify.app/]
 
 ## Run Locally
 
