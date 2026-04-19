@@ -1,0 +1,7 @@
+{
+  "name": "StudyGenius AI",
+  "description": "An intelligent study companion that transforms documents into interactive quizzes and concise summaries using Google Gemini.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

@@ -1,0 +1,99 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: users
+    // Document ID: {userId}
+    // Fields:
+    //   - id: string (required)
+    //   - username: string (required, max 50 chars)
+    //   - email: string (required, valid email)
+    //   - avatar: string (optional, valid URL)
+    //   - settings: map (optional)
+    //   - createdAt: number (required, timestamp)
+    //
+    // Collection: history
+    // Document ID: {historyId}
+    // Fields:
+    //   - id: string (required)
+    //   - userId: string (required, must match auth.uid)
+    //   - type: string (required, enum: quiz, flashcards, summary, note)
+    //   - title: string (required, max 100 chars)
+    //   - date: number (required, timestamp)
+    //   - data: string (required, JSON stringified data)
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+    function uidUnchanged() {
+      return !('id' in request.resource.data) || request.resource.data.id == request.auth.uid;
+    }
+    function uidNotModified() {
+      return !('id' in request.resource.data) || request.resource.data.id == resource.data.id;
+    }
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+    function isValidUrl(url) {
+      return url is string && (url.matches("^https://.*") || url.matches("^http://.*"));
+    }
+
+    // Domain Validators
+    function isValidUser(data) {
+      return data.id is string && data.id == request.auth.uid &&
+             data.username is string && data.username.size() > 0 && data.username.size() <= 50 &&
+             data.email is string && isValidEmail(data.email) &&
+             (!('avatar' in data) || isValidUrl(data.avatar) || data.avatar == "") &&
+             (!('settings' in data) || data.settings is map) &&
+             data.createdAt is number;
+    }
+
+    function isValidHistoryItem(data) {
+      return data.id is string && data.id.size() >= 0 &&
+             data.userId is string && (data.userId == (request.auth != null ? request.auth.uid : 'guest')) &&
+             data.type in ['quiz', 'flashcards', 'summary', 'note'] &&
+             data.title is string && data.title.size() >= 0 && data.title.size() <= 500 &&
+             data.date is number &&
+             data.data is string;
+    }
+
+    function isValidActivityLog(data) {
+      return data.id is string && data.id.size() > 0 &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.action is string && data.action.size() > 0 && data.action.size() <= 100 &&
+             data.details is string && data.details.size() <= 500 &&
+             data.timestamp is number;
+    }
+
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /history/{historyId} {
+      allow read: if isDocOwner();
+      allow create: if (isAuthenticated() && request.resource.data.userId == request.auth.uid || (!isAuthenticated() && request.resource.data.userId == 'guest')) && hasRequiredFields(['id', 'userId', 'type', 'title', 'date', 'data']) && isValidHistoryItem(request.resource.data);
+      allow update: if ((isDocOwner() && request.resource.data.userId == request.auth.uid) || (!isAuthenticated() && resource.data.userId == 'guest' && request.resource.data.userId == 'guest')) && isValidHistoryItem(request.resource.data) && request.resource.data.id == resource.data.id;
+      allow delete: if isDocOwner();
+    }
+
+    match /activity_logs/{logId} {
+      allow read: if isDocOwner();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid && hasRequiredFields(['id', 'userId', 'action', 'details', 'timestamp']) && isValidActivityLog(request.resource.data);
+      allow update: if false; // Activity logs should be immutable
+      allow delete: if isDocOwner();
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "username": { "type": "string" },
+        "email": { "type": "string" },
+        "avatar": { "type": "string" },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "theme": { "type": "string", "enum": ["light", "dark"] },
+            "notifications": { "type": "boolean" },
+            "privacy": { "type": "string" }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "username", "email", "createdAt"]
+    },
+    "HistoryItem": {
+      "title": "HistoryItem",
+      "description": "A generated item (quiz, flashcards, summary, notes)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["quiz", "flashcards", "summary", "note"] },
+        "title": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "data": { "type": "string" }
+      },
+      "required": ["id", "userId", "type", "title", "date", "data"]
+    },
+    "ActivityLog": {
+      "title": "ActivityLog",
+      "description": "A log of user activity",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "action": { "type": "string" },
+        "details": { "type": "string" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["id", "userId", "action", "details", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles"
+    },
+    "/history/{historyId}": {
+      "schema": { "$ref": "#/entities/HistoryItem" },
+      "description": "User generated history items"
+    },
+    "/activity_logs/{logId}": {
+      "schema": { "$ref": "#/entities/ActivityLog" },
+      "description": "User activity logs"
+    }
+  }
+}
